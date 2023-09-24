@@ -1,6 +1,5 @@
 
 <img src="assets/spotify_icon.png" width="50" height="50" align="right">
-<br>
 
 # Spotify Track Popularity by Market Analysis
 
