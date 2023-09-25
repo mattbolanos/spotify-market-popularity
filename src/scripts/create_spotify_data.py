@@ -9,7 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 # load functions
-from functions.spotify_api import parse_playlist_track
+from functions.spotify_api import parse_playlist_track, retrieve_artist
 
 # read in secrets
 load_dotenv()
@@ -48,6 +48,8 @@ browser.close()
 
 # -- Playlists -- #
 
+print("-- scraping playlists --")
+
 # extract playlist ids from hrefs
 playlist_ids = [href.split("/")[-1] for href in playlist_hrefs]
 
@@ -55,7 +57,7 @@ playlist_ids = [href.split("/")[-1] for href in playlist_hrefs]
 top_50_playlists = []
 
 # call api for each playlist
-for playlist_id in playlist_ids[:4]:
+for playlist_id in playlist_ids[:3]:
     playlist_res = sp.playlist(playlist_id=playlist_id)
     # keep playlist name
     playlist_name = playlist_res["name"]
@@ -69,7 +71,23 @@ for playlist_id in playlist_ids[:4]:
         # append to list
         top_50_playlists.append(track_json)
 
+# -- Artists -- #
+print("")
+print("-- scraping artists --")
+
+# get artist ids
+artist_ids = list(set([artist["id"] for playlist in top_50_playlists for artist in playlist["artist_ids"]]))
+
+# init list to store all data
+artists = []
+
+for artist_id in artist_ids:
+    artists.append(retrieve_artist(artist_id=artist_id, sp=sp))
+
 # -- Data Write -- #
 # top 50 playlists
-with open("data/spotify_top_50_playlists.json", "w") as outfile:
-    json.dump(top_50_playlists, outfile)
+# with open("data/spotify_top_50_playlists.json", "w") as outfile:
+#     json.dump(top_50_playlists, outfile)
+# artists
+# with open("data/spotify_artists.json", "w") as outfile:
+#     json.dump(artists, outfile)

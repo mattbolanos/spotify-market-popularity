@@ -1,3 +1,7 @@
+# import packages
+from spotipy import Spotify
+
+
 def parse_playlist_track(track: dict, playlist_id: str, playlist_name: str) -> dict:
     """parses a track object from a playlist object
 
@@ -6,7 +10,7 @@ def parse_playlist_track(track: dict, playlist_id: str, playlist_name: str) -> d
         playlist_id (str): playlist id
         playlist_name (str): playlist name
     Returns:
-        track_json (dict): parsed track object
+        (dict): parsed track object
     """
 
     # go down one level
@@ -33,7 +37,7 @@ def parse_playlist_track(track: dict, playlist_id: str, playlist_name: str) -> d
     popularity = track["popularity"]
 
     # convert into one json
-    track_json = {
+    return {
         "track_id": track_id,
         "playlist_id": playlist_id,
         "playlist_name": playlist_name,
@@ -45,4 +49,34 @@ def parse_playlist_track(track: dict, playlist_id: str, playlist_name: str) -> d
         "available_markets": avail_markets,
     }
 
-    return track_json
+
+def retrieve_artist(artist_id: str, sp: Spotify) -> dict:
+    """retrieve artist data from spotify api
+
+    Args:
+        artist_id (str): artist id
+
+    Returns:
+        dict: artist data json
+    """
+    # call api
+    artist_res = sp.artist(artist_id=artist_id)
+    # followers
+    followers = artist_res["followers"]["total"]
+    # genres
+    genres = artist_res["genres"]
+    # popularity
+    popularity = artist_res["popularity"]
+    # name
+    artist_name = artist_res["name"]
+
+    print("-- retrieved artist: " + artist_name, "--")
+
+    # append to list
+    return {
+        "artist_id": artist_id,
+        "artist_name": artist_name,
+        "followers": followers,
+        "genres": genres,
+        "popularity": popularity,
+    }
