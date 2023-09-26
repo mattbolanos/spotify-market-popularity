@@ -6,13 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 # load functions
-from functions.spotify_api import (
-    parse_playlist_track,
-    request_artist,
-    request_audio_features,
-    get_auth_headers,
-    request_playlist,
-)
+from functions.spotify_api import SpotifyAPI
 
 # SET LIMIT - this whole script takes a while to run and may end up in rate limiting
 # This script is for demonstration purposes, albeit functional, and is not intended to be run in full
@@ -23,8 +17,8 @@ load_dotenv()
 client_id = os.getenv("CLIENT_ID")
 client_secret = os.getenv("CLIENT_SECRET")
 
-# get auth headers
-auth_headers = get_auth_headers(client_id=client_id, client_secret=client_secret)
+# init api
+spotify = SpotifyAPI(client_id=client_id, client_secret=client_secret)
 
 # -- Webdriver -- #
 
@@ -58,7 +52,7 @@ top_50_playlists = []
 
 # call api for each playlist
 for playlist_id in playlist_ids[:scrape_lim]:
-    playlist_res = request_playlist(playlist_id=playlist_id, auth_headers=auth_headers)
+    playlist_res = spotify.request_playlist(playlist_id=playlist_id)
     # keep playlist name
     playlist_name = playlist_res["name"]
     print("-- processing playlist: " + playlist_name, "--")
@@ -67,7 +61,7 @@ for playlist_id in playlist_ids[:scrape_lim]:
     # loop through tracks
     for track in playlist_tracks:
         # parse track
-        track_json = parse_playlist_track(track=track, playlist_id=playlist_id, playlist_name=playlist_name)
+        track_json = spotify.parse_playlist_track(track=track, playlist_id=playlist_id, playlist_name=playlist_name)
         # append to list
         top_50_playlists.append(track_json)
 
@@ -82,7 +76,7 @@ artist_ids = list(set([artist["id"] for playlist in top_50_playlists for artist 
 artists = []
 
 for artist_id in artist_ids[:scrape_lim]:
-    artists.append(request_artist(artist_id=artist_id, auth_headers=auth_headers))
+    artists.append(spotify.request_artist(artist_id=artist_id))
 
 # -- Audio Features -- #
 print("")
@@ -91,15 +85,12 @@ print("-- scraping audio features --")
 # get track ids
 track_ids = list(set([track["track_id"] for track in top_50_playlists]))
 
-# get auth headers
-auth_headers = get_auth_headers(client_id=client_id, client_secret=client_secret)
-
 # init list to store all data
 audio_features = []
 
 for track_id in track_ids[:scrape_lim]:
     # retrieve audio features
-    audio_features.append(request_audio_features(track_id=track_id, auth_headers=auth_headers))
+    audio_features.append(spotify.request_audio_features(track_id=track_id))
 
 # -- Data Write -- #
 # top 50 playlists
