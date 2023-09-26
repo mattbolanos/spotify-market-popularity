@@ -1,12 +1,13 @@
 # import packages
-from spotipy import Spotify
 import random
 import time
+import requests
+import base64
 
 
 def random_sleep():
-    """sleep for a random amount of time between .5 and 1.5 seconds"""
-    time.sleep(random.uniform(0.5, 1.5))
+    """sleep for a random amount of time"""
+    time.sleep(random.uniform(1.5, 3))
 
 
 def parse_playlist_track(track: dict, playlist_id: str, playlist_name: str) -> dict:
@@ -60,62 +61,82 @@ def parse_playlist_track(track: dict, playlist_id: str, playlist_name: str) -> d
     }
 
 
-def retrieve_artist(artist_id: str, sp: Spotify) -> dict:
+def request_playlist(playlist_id: str, auth_headers: dict) -> dict:
+    """request playlist from spotify api
+
+    Args:
+        playlist_id (str): playlist id
+        auth_headers (dict): authorization headers
+    Returns:
+        dict: playlist json
+    """
+    # call api
+    playlist_res = requests.get("https://api.spotify.com/v1/playlists/" + playlist_id, headers=auth_headers).json()
+
+    if "id" in playlist_res.keys():
+        return playlist_res
+    else:
+        return {"playlist_id": playlist_id}
+
+
+def request_artist(artist_id: str, auth_headers: dict) -> dict:
     """retrieve artist data from spotify api
 
     Args:
         artist_id (str): artist id
+        auth_headers (dict): authorization headers
 
     Returns:
         dict: artist data json
     """
     # call api
-    artist_res = sp.artist(artist_id=artist_id)
+    artist_res = requests.get("https://api.spotify.com/v1/artists/" + artist_id, headers=auth_headers).json()
 
-    # followers
-    followers = artist_res["followers"]["total"]
+    if "id" in artist_res.keys():
+        # followers
+        followers = artist_res["followers"]["total"]
 
-    # genres
-    genres = artist_res["genres"]
+        # genres
+        genres = artist_res["genres"]
 
-    # popularity
-    popularity = artist_res["popularity"]
+        # popularity
+        popularity = artist_res["popularity"]
 
-    # name
-    artist_name = artist_res["name"]
+        # name
+        artist_name = artist_res["name"]
 
-    print("-- retrieved artist: " + artist_name, "--")
+        print("-- retrieved artist: " + artist_name, "--")
 
-    # random sleep
-    random_sleep()
+        # random sleep
+        random_sleep()
 
-    # append to list
-    return {
-        "artist_id": artist_id,
-        "artist_name": artist_name,
-        "followers": followers,
-        "genres": genres,
-        "popularity": popularity,
-    }
+        # append to list
+        return {
+            "artist_id": artist_id,
+            "artist_name": artist_name,
+            "followers": followers,
+            "genres": genres,
+            "popularity": popularity,
+        }
 
 
-def retrieve_audio_features(track_id: str, sp: Spotify) -> dict:
-    """retrieve audio features from spotify api
+def request_audio_features(track_id: str, auth_headers: dict) -> dict:
+    """request audio features from spotify api
 
     Args:
         track_id (str): track id
-        sp (Spotify): spotify api object
-
+        auth_headers (dict): authorization headers
     Returns:
         dict: audio features json
     """
-    # call api
-    track_res = sp.audio_features(tracks=track_id)[0]
+
+    track_res = requests.get("https://api.spotify.com/v1/audio-features/" + track_id, headers=auth_headers).json()
 
     # random sleep
     random_sleep()
 
-    if track_res:
+    if "id" in track_res.keys():
+        print("-- retrieved audio features: " + track_id, "--")
         return {
             "track_id": track_id,
             "danceability": track_res["danceability"],
@@ -133,4 +154,35 @@ def retrieve_audio_features(track_id: str, sp: Spotify) -> dict:
             "time_signature": track_res["time_signature"],
         }
     else:
-        return None
+        if track_res["error"]["status"] == 429:
+            raise Exception("rate limit exceeded")
+        print("audio features error")
+        return {"track_id": track_id}
+
+
+def get_auth_headers(client_id: str, client_secret: str) -> dict:
+    """
+    get access token from Spotify API
+
+    Args:
+        client_id (str): client id
+        client_secret (str): client secret
+    Returns:
+        (dict): authorization headers
+    """
+
+    auth_header = base64.b64encode(f"{client_id}:{client_secret}".encode("utf-8")).decode("utf-8")
+    headers = {"Authorization": f"Basic {auth_header}"}
+
+    data = {"grant_type": "client_credentials"}
+
+    response = requests.post("https://accounts.spotify.com/api/token", headers=headers, data=data)
+
+    if response.status_code == 200:
+        token = response.json()["access_token"]
+    else:
+        raise Exception("could not retrieve access token")
+
+    auth_headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json"}
+
+    return auth_headers
