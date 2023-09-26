@@ -27,9 +27,8 @@ Once the above steps are followed, you should be able to select the poetry shell
 #### Organization
 - Develop in the `src/proto` directory
     - We can move around files later
-- The data needed is in `data`
-    - Matt will write code to convert these JSONs to dataframes
-
+- The raw JSON data is in `data`
+    - see `src/proto/dev_feature_eng.ipynb` for an example of how to load the data as pandas dataframes
 #### Pushing Code w/ Pre-Commit
 To install pre-commit, run the following command in your terminal:
 ```
