@@ -69,7 +69,29 @@ def add_features(audio_features: pd.DataFrame, artists: pd.DataFrame, playlists:
     # rename some columns
     playlists.rename(columns={"popularity": "track_popularity"}, inplace=True)
 
-    # -- artists -- #
-    artists.rename(columns={"popularity": "artist_popularity"}, inplace=True)
+    # create a longer pivot of playlists to get summary statistics of multi-artists
+    playlists_w_artists = playlists.copy().explode("artist_ids")
+    playlists_w_artists["artist_id"] = playlists_w_artists["artist_ids"].apply(lambda x: x["id"])
+    playlists_w_artists = playlists_w_artists[["artist_id", "track_id"]].drop_duplicates()
+
+    # join artists to playlists_w_artists
+    playlists_w_artists = playlists_w_artists.merge(artists, left_on="artist_id", right_on="artist_id")
+
+    # group by track_id,
+    # sum followers, and take average of popularity
+    track_artist_sum_stats = (
+        playlists_w_artists.groupby("track_id")
+        .agg({"followers": "sum", "popularity": "mean"})
+        .reset_index()
+        .rename(
+            columns={
+                "followers": "tot_artist_followers",
+                "popularity": "avg_artist_popularity",
+            }
+        )
+    )
+
+    # join back to playlists
+    playlists = playlists.merge(track_artist_sum_stats, left_on="track_id", right_on="track_id")
 
     return audio_features, artists, playlists
