@@ -24,6 +24,21 @@ poetry shell
 ```
 Once the above steps are followed, you should be able to select the poetry shell as the kernel in a Jupyter Notebook.
 
+To add a new library to the project, run the following command in the project root directory:
+```
+poetry add <library>
+```
+To remove a library from the project, run the following command in the project root directory:
+```
+poetry remove <library>
+```
+
+Then run the following command to update the `poetry.lock` file:
+```
+poetry update
+```
+And to be safe, run `poetry install` again to update the `pyproject.toml` file:
+
 #### Organization
 - Develop in the `src/proto` directory
     - We can move around files later
