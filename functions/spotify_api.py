@@ -115,7 +115,7 @@ class SpotifyAPI:
         playlist_res = self.call_api("playlists/" + playlist_id)
         return playlist_res if "id" in playlist_res.keys() else {"playlist_id": playlist_id}
 
-    def request_artist(self, artist_id: str) -> dict:
+    def request_artist(self, artist_id: str, silent: bool = False) -> dict:
         """retrieve artist data from spotify api
 
         Args:
@@ -141,7 +141,8 @@ class SpotifyAPI:
             # name
             artist_name = artist_res["name"]
 
-            print("-- retrieved artist: " + artist_name, "--")
+            if not silent:
+                print("-- retrieved artist: " + artist_name, "--")
 
             # random sleep
             self.random_sleep()
@@ -155,7 +156,7 @@ class SpotifyAPI:
                 "popularity": popularity,
             }
 
-    def request_audio_features(self, track_id: str) -> dict:
+    def request_audio_features(self, track_id: str, silent: bool = False) -> dict:
         """request audio features from spotify api
 
         Args:
@@ -171,7 +172,9 @@ class SpotifyAPI:
         self.random_sleep()
 
         if "id" in track_res.keys():
-            print("-- retrieved audio features: " + track_id, "--")
+            if not silent:
+                print("-- retrieved audio features: " + track_id, "--")
+
             return {
                 "track_id": track_id,
                 "danceability": track_res["danceability"],
