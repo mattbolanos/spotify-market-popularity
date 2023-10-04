@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 
-def get_data(audio_path: str, artists_path: str, playlists_path: str) -> list:
+def get_data(audio_path: str, artists_path: str, playlists_path: str, genres_path: str = None) -> list:
     """
     read in raw spotify api json data from local files.
 
@@ -29,17 +29,26 @@ def get_data(audio_path: str, artists_path: str, playlists_path: str) -> list:
     with open(playlists_path) as f:
         playlists = pd.read_json(f)
 
+    # genres
+    if genres_path is None:
+        genres_path = "../../data/chosic_genres.csv"
+
+    genres = pd.read_csv(genres_path)
+
     # return list
-    return add_features(audio_features, artists, playlists)
+    return add_features(audio_features, artists, playlists, genres)
 
 
-def add_features(audio_features: pd.DataFrame, artists: pd.DataFrame, playlists: pd.DataFrame) -> list:
+def add_features(
+    audio_features: pd.DataFrame, artists: pd.DataFrame, playlists: pd.DataFrame, genres: pd.DataFrame
+) -> list:
     """add features to read in spotify data
 
     Args:
         audio_features (pd.DataFrame): audio features
         artists (pd.DataFrame): artists
         playlists (pd.DataFrame): playlists
+        genres (pd.DataFrame): genres
     Returns:
         audio_features (pd.DataFrame): audio features w/ added features
         artists (pd.DataFrame): artists w/ added features
@@ -96,8 +105,42 @@ def add_features(audio_features: pd.DataFrame, artists: pd.DataFrame, playlists:
     # join back to playlists
     playlists = playlists.merge(track_artist_sum_stats, on="track_id")
 
+    # take first genre as sub_genre
+    artists["sub_genre"] = artists["genres"].apply(lambda x: x[0] if len(x) > 0 else None)
+    # convert sub_genre to camel case
+    artists["sub_genre"] = artists["sub_genre"].apply(convert_to_camel_case)
+
     # -- tracks -- #
     # join audio features to playlists
     tracks = playlists.merge(audio_features, on="track_id", how="inner")
 
+    # -- genres -- #
+    # make sub_genre camel case
+    genres["sub_genre"] = genres["sub_genre"].apply(convert_to_camel_case)
+
+    # join back to artists
+    artists = artists.merge(genres, on="sub_genre", how="left")
+
+    # drop sub_genre
+    artists.drop(columns=["sub_genre"], inplace=True)
+
     return artists, tracks
+
+
+def convert_to_camel_case(s: str) -> str:
+    """convert string to camel case
+
+    Args:
+        s (str): string to convert
+
+    Returns:
+        str: camel case string
+    """
+    if s is None:
+        return ""
+    # Remove all special characters using regex
+    cleaned = re.sub(r"[^a-zA-Z0-9\s]", "", s)
+    # remove space at beginning and end
+    cleaned = cleaned.strip()
+    # Replace whitespace with "_"
+    return re.sub(r"\s+", "_", cleaned)
