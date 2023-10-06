@@ -107,7 +107,8 @@ class SpotifyAPI:
 
         Args:
             playlist_id (str): playlist id
-            auth_headers (dict): authorization headers
+            silent (bool, optional): print output. Defaults to False.
+
         Returns:
             dict: playlist json
         """
@@ -120,7 +121,7 @@ class SpotifyAPI:
 
         Args:
             artist_id (str): artist id
-            auth_headers (dict): authorization headers
+            silent (bool, optional): print output. Defaults to False.
 
         Returns:
             dict: artist data json
@@ -161,7 +162,8 @@ class SpotifyAPI:
 
         Args:
             track_id (str): track id
-            auth_headers (dict): authorization headers
+            silent (bool, optional): print output. Defaults to False.
+
         Returns:
             dict: audio features json
         """
