@@ -5,12 +5,7 @@ description = ""
 authors = ["Matt Bolanos <matthew.a.bolanos@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-
-[[tool.poetry.packages]]
-include = "functions"
-
-[[tool.poetry.packages]]
-include = "data"
+packages = [{include = "src"}, {include = "functions"}]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
