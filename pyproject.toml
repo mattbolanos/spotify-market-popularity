@@ -24,6 +24,7 @@ k-means-constrained = "^0.7.3"
 gower = "^0.1.2"
 scipy = "^1.11.3"
 beautifulsoup4 = "^4.12.2"
+altair = "^5.1.2"
 
 [build-system]
 requires = ["poetry-core"]
