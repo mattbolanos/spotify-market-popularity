@@ -2411,7 +2411,25 @@ files = [
 [package.dependencies]
 h11 = ">=0.9.0,<1"
 
+[[package]]
+name = "yellowbrick"
+version = "1.5"
+description = "A suite of visual analysis and diagnostic tools for machine learning."
+optional = false
+python-versions = ">=3.4, <4"
+files = [
+    {file = "yellowbrick-1.5-py3-none-any.whl", hash = "sha256:4bb2895cecf94a0e736398bbac6c5d72032ba3ff2273f49df660b14ef419305d"},
+    {file = "yellowbrick-1.5.tar.gz", hash = "sha256:99a6336dd2e7ce586a8cde67966b79c51b479d3759f3c083d7e19ffe949f6076"},
+]
+
+[package.dependencies]
+cycler = ">=0.10.0"
+matplotlib = ">=2.0.2,<3.0.0 || >3.0.0"
+numpy = ">=1.16.0"
+scikit-learn = ">=1.0.0"
+scipy = ">=1.0.0"
+
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "82f4b85f46cfbeb020ebeb5fedf6ae564ab4b5110660f60f446ed81a39063a6f"
+content-hash = "8d6b8a68dc0a23b163b76e1db242769321f1aacf45ff1eccea9d40fc5d272e78"
