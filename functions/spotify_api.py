@@ -116,7 +116,7 @@ class SpotifyAPI:
         playlist_res = self.call_api("playlists/" + playlist_id)
         return playlist_res if "id" in playlist_res.keys() else {"playlist_id": playlist_id}
 
-    def request_artist(self, artist_id: str, silent: bool = False) -> dict:
+    def request_artist(self, artist_id: str, silent: bool = False, img_only: bool = False) -> dict:
         """retrieve artist data from spotify api
 
         Args:
@@ -148,14 +148,20 @@ class SpotifyAPI:
             # random sleep
             self.random_sleep()
 
-            # append to list
-            return {
-                "artist_id": artist_id,
-                "artist_name": artist_name,
-                "followers": followers,
-                "genres": genres,
-                "popularity": popularity,
-            }
+            # return info
+            if not img_only:
+                return {
+                    "artist_id": artist_id,
+                    "artist_name": artist_name,
+                    "followers": followers,
+                    "genres": genres,
+                    "popularity": popularity,
+                }
+            else:
+                return {
+                    "artist_id": artist_id,
+                    "artist_img": artist_res["images"][0]["url"] if len(artist_res["images"]) > 0 else None,
+                }
 
     def request_audio_features(self, track_id: str, silent: bool = False) -> dict:
         """request audio features from spotify api
