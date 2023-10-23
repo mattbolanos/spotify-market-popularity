@@ -1,3 +1,4 @@
+# import libraries
 from PIL import Image
 import urllib.request
 
